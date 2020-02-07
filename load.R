@@ -107,7 +107,7 @@ extract_response_information <- function(question) {
     
     response_detail <- NA_character_
     
-    if (response_type == "written") {
+    if (response_type == "verbal") {
       response_detail <- paste("Debates", response_date)
     }
     
@@ -144,13 +144,11 @@ extract_response_information <- function(question) {
   responses_to_return <- entry_components[-1] %>%
     map_dfr(extract_response_details_from_components)
   
-  responses_to_return
+  responses_to_return %>%
+    mutate(response_date = mdy(response_date))
 }
 
 questions <- questions_raw %>%
-  map_dfr(extract_question_information)
-
-questions2 <- questions_raw %>%
   map_dfr(extract_question_information)
 
 responses <- questions_raw %>%
