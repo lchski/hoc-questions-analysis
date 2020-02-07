@@ -128,10 +128,6 @@ extract_response_information <- function(question) {
         paste("Sessional Paper No.", .)
     }
     
-    response_date <- response_date %>%
-      str_remove("— ") %>%
-      trimws()
-    
     #response_detail = NA_character_ ## TODO remove me, just for debugging when response_detail breaks
     
     tibble(
