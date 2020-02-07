@@ -71,17 +71,15 @@ extract_response_information <- function(question) {
     str_remove("Q-") %>%
     as.integer
   
-  responses_to_return <- tibble()
-  
   if (number_of_responses == 0) {
-    responses_to_return %>% rbind(tibble(
+    responses_to_return <- tibble(
       question_number = question_number,
       response_date = NA_character_,
       response_sitting_day = NA_integer_,
       response_type = NA_character_,
       response_detail = NA_character_,
       response_details_full = NA_character_
-    ))
+    )
     
     return(responses_to_return)
   }
@@ -107,14 +105,22 @@ extract_response_information <- function(question) {
     }
     
     if (response_type == "written") {
-      response_detail <- response_details %>%
-        str_remove(response_date) %>%
-        str_remove(fixed(" — ")) %>%
-        str_remove("[A-Za-z (\\.]*") %>%
-        str_remove("\\)") %>%
-        str_remove("[[:space:]]") %>%
-        trimws() %>%
-        paste("Sessional Paper No.", .)
+      response_date_to_remove <- response_date
+      
+      if (is.na(response_date_to_remove)) {
+        response_date_to_remove <- "zzz"
+      }
+      
+      #response_detail <- response_details %>%
+      #  str_remove(response_date_to_remove) %>%
+      #  str_remove(fixed(" — ")) %>%
+      #  str_remove("[A-Za-z (\\.]*") %>%
+      #  str_remove("\\)") %>%
+      #  str_remove("[[:space:]]") %>%
+      #  trimws() %>%
+      #  paste("Sessional Paper No.", .)
+      
+      response_detail <- NA_character_
     }
     
     response_date <- response_date %>%
@@ -134,9 +140,7 @@ extract_response_information <- function(question) {
   }
 
   ## take out the question component, get the response components
-  responses <- entry_components[-1]
-  
-  responses_to_return <- responses %>%
+  responses_to_return <- entry_components[-1] %>%
     map_dfr(extract_response_details_from_components)
   
   responses_to_return
@@ -145,8 +149,15 @@ extract_response_information <- function(question) {
 extract_response_information(questions_raw[[1]])
 extract_response_information(questions_raw[[70]])
 extract_response_information(questions_raw[[1720]])
+extract_response_information(questions_raw[[2530]])
 
 questions <- questions_raw %>%
   map_dfr(extract_question_information)
+
+questions2 <- questions_raw %>%
+  map_dfr(extract_question_information)
+
+responses <- questions_raw %>%
+  map_dfr(extract_response_information)
 
 
