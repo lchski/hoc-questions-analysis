@@ -7,6 +7,14 @@ library(helpers)
 questions_raw <- read_xml("data/source/statuswq-E.XML") %>% xml_find_all(xpath = ".//ReviewItem")
 
 extract_question_information <- function(question) {
+  extract_sitting_day <- function(component) {
+    component  %>% 
+      xml_attr("NodeTitle") %>%
+      str_extract("Status - ([0-9]+)") %>%
+      str_remove("Status - ") %>%
+      as.integer
+  }
+  
   has_response <- question %>% xml_length() > 1
   
   entry_components <- question %>% xml_children()
@@ -18,6 +26,9 @@ extract_question_information <- function(question) {
     xml_text() %>%
     str_remove("Q-") %>%
     as.integer
+  
+  question_sitting_day <- question_components %>%
+    extract_sitting_day
   
   question_date <- question_components %>%
     xml_find_first(".//ReviewItemDate") %>%
@@ -34,6 +45,7 @@ extract_question_information <- function(question) {
     xml_text()
   
   response_date <- NA_character_
+  response_sitting_day <- NA_integer_
   response_type <- NA_character_
   response_detail <- NA_character_
   
@@ -43,6 +55,9 @@ extract_question_information <- function(question) {
     response_date <- response_components %>%
       xml_find_first(".//ReviewItemDate") %>%
       xml_text()
+    
+    response_sitting_day <- response_components %>%
+      extract_sitting_day
     
     response_details <- response_components %>%
       xml_text() %>%
@@ -69,10 +84,12 @@ extract_question_information <- function(question) {
   
   tibble(
     question_number = question_number,
+    question_sitting_day = question_sitting_day,
     question_date = mdy(question_date),
     question_title = question_title,
     asker = asker,
     response_date = mdy(response_date),
+    response_sitting_day = response_sitting_day,
     response_type = response_type,
     response_detail = response_detail
   ) %>%
@@ -82,9 +99,5 @@ extract_question_information <- function(question) {
 
 questions <- questions_raw %>%
   map_dfr(extract_question_information)
-
-extract_question_information(questions_raw[[1]])
-extract_question_information(questions_raw[[2]])
-extract_question_information(questions_raw[[309]])
 
 
