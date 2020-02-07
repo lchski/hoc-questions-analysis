@@ -4,8 +4,6 @@ library(lubridate)
 
 library(helpers)
 
-questions_raw <- read_xml("data/source/42-1.XML") %>% xml_find_all(xpath = ".//ReviewItem")
-
 extract_sitting_day <- function(component) {
   component  %>% 
     xml_attr("NodeTitle") %>%
@@ -13,6 +11,8 @@ extract_sitting_day <- function(component) {
     str_remove("[^0-9]*") %>%
     as.integer
 }
+
+
 
 extract_question_information <- function(question) {
   number_of_components <- question %>% xml_length()
@@ -139,7 +139,7 @@ extract_response_information <- function(question) {
       response_details_full = response_details
     )
   }
-
+  
   ## take out the question component, get the response components
   responses_to_return <- entry_components[-1] %>%
     map_dfr(extract_response_details_from_components)
@@ -148,10 +148,44 @@ extract_response_information <- function(question) {
     mutate(response_date = mdy(response_date))
 }
 
-questions <- questions_raw %>%
-  map_dfr(extract_question_information)
+read_questions <- function(path_to_xml_file) {
+  questions_raw <- read_xml(path_to_xml_file) %>% xml_find_all(xpath = ".//ReviewItem")
+  
+  questions_raw %>%
+    map_dfr(extract_question_information)
+}
 
-responses <- questions_raw %>%
-  map_dfr(extract_response_information)
+read_responses <- function(path_to_xml_file) {
+  questions_raw <- read_xml(path_to_xml_file) %>% xml_find_all(xpath = ".//ReviewItem")
+  
+  questions_raw %>%
+    map_dfr(extract_response_information)
+}
+
+
+
+question_files_by_parliament <- fs::dir_ls("data/source/", regexp = "\\.XML") %>%
+  as_tibble() %>%
+  transmute(path = as.character(value))
+
+questions_by_parliament <- question_files_by_parliament %>%
+  pull(path) %>%
+  set_names(.) %>%
+  map_dfr(read_questions, .id = "source_file") %>%
+  mutate(parliament = source_file %>%
+              str_remove(fixed("data/source/")) %>%
+              str_remove(fixed(".XML"))) %>%
+  separate(parliament, c("parliament", "session"), convert = TRUE) %>%
+  select(parliament, session, question_number:number_of_responses)
+
+responses_by_parliament <- question_files_by_parliament %>%
+  pull(path) %>%
+  set_names(.) %>%
+  map_dfr(read_responses, .id = "source_file") %>%
+  mutate(parliament = source_file %>%
+           str_remove(fixed("data/source/")) %>%
+           str_remove(fixed(".XML"))) %>%
+  separate(parliament, c("parliament", "session"), convert = TRUE) %>%
+  select(parliament, session, question_number:response_details_full)
 
 
