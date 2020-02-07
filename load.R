@@ -97,10 +97,18 @@ extract_response_information <- function(question) {
     
     if (is.na(response_details)) {
       response_type = "other"
-    } else if (response_details == "Answered (See Debates)") {
+    } else if (str_detect(response_details, regex("Withdrawn", ignore_case = TRUE))) {
+      response_type = "withdrawn"
+    } else if (str_detect(response_details, regex("See Debates", ignore_case = TRUE))) {
       response_type <- "verbal"
     } else {
       response_type <- "written"
+    }
+    
+    response_detail <- NA_character_
+    
+    if (response_type == "written") {
+      response_detail <- paste("Debates", response_date)
     }
     
     if (response_type == "written") {
@@ -142,11 +150,6 @@ extract_response_information <- function(question) {
   
   responses_to_return
 }
-
-extract_response_information(questions_raw[[1]])
-extract_response_information(questions_raw[[70]])
-extract_response_information(questions_raw[[1720]])
-extract_response_information(questions_raw[[2530]])
 
 questions <- questions_raw %>%
   map_dfr(extract_question_information)

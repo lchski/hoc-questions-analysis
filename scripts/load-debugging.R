@@ -1,4 +1,12 @@
 
+## test cases (from 42-1)
+extract_response_information(questions_raw[[1]])
+extract_response_information(questions_raw[[65]])
+extract_response_information(questions_raw[[70]])
+extract_response_information(questions_raw[[1720]])
+extract_response_information(questions_raw[[1763]])
+extract_response_information(questions_raw[[2530]])
+
 ## test cases (from 43-1)
 extract_question_information(questions_raw[[1]]) ## Q asked and answered with sessional paper
 extract_question_information(questions_raw[[2]]) ## Q asked and answered with debate
