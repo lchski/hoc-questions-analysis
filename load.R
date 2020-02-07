@@ -6,16 +6,17 @@ library(helpers)
 
 questions_raw <- read_xml("data/source/42-1.XML") %>% xml_find_all(xpath = ".//ReviewItem")
 
+extract_sitting_day <- function(component) {
+  component  %>% 
+    xml_attr("NodeTitle") %>%
+    str_extract("[^0-9]*([0-9]+)") %>%
+    str_remove("[^0-9]*") %>%
+    as.integer
+}
+
 extract_question_information <- function(question) {
-  extract_sitting_day <- function(component) {
-    component  %>% 
-      xml_attr("NodeTitle") %>%
-      str_extract("[^0-9]*([0-9]+)") %>%
-      str_remove("[^0-9]*") %>%
-      as.integer
-  }
-  
-  has_response <- question %>% xml_length() > 1
+  number_of_components <- question %>% xml_length()
+  number_of_responses <- number_of_components - 1
   
   entry_components <- question %>% xml_children()
   
@@ -44,25 +45,58 @@ extract_question_information <- function(question) {
     xml_find_first(".//Affiliation") %>%
     xml_text()
   
-  response_date <- NA_character_
-  response_sitting_day <- NA_integer_
-  response_type <- NA_character_
-  response_detail <- NA_character_
+  tibble(
+    question_number = question_number,
+    question_sitting_day = question_sitting_day,
+    question_date = mdy(question_date),
+    question_title = question_title,
+    asker = asker,
+    number_of_responses = number_of_responses
+  ) %>%
+    separate(asker, into = c("asker_name", "asker_riding"), " \\(") %>%
+    mutate(asker_riding = str_remove(asker_riding, "\\)"))
+}
+
+extract_response_information <- function(question) {
+  number_of_components <- question %>% xml_length()
+  number_of_responses <- number_of_components - 1
   
-  if (has_response) {
-    response_components <- entry_components[[2]]
+  entry_components <- question %>% xml_children()
+  
+  question_components <- entry_components[[1]]
+  
+  question_number <- question_components %>%
+    xml_find_first(".//ReviewItemNumber/Document[@Desc='Number']") %>%
+    xml_text() %>%
+    str_remove("Q-") %>%
+    as.integer
+  
+  responses_to_return <- tibble()
+  
+  if (number_of_responses == 0) {
+    responses_to_return %>% rbind(tibble(
+      question_number = question_number,
+      response_date = NA_character_,
+      response_sitting_day = NA_integer_,
+      response_type = NA_character_,
+      response_detail = NA_character_,
+      response_details_full = NA_character_
+    ))
     
-    response_date <- response_components %>%
-      xml_find_first(".//ReviewItemDate") %>%
-      xml_text()
-    
+    return(responses_to_return)
+  }
+  
+  extract_response_details_from_components <- function(response_components) {
     response_sitting_day <- response_components %>%
       extract_sitting_day
     
     response_details <- response_components %>%
-      xml_text() %>%
-      str_remove(response_date) %>%
-      trimws()
+      xml_text()
+    
+    ## TODO verify this doesn't break more stuff hehe
+    response_date <- response_details %>%
+      str_split_fixed(" — ", n = 2) %>%
+      .[[2]]
     
     if (is.na(response_details)) {
       response_type = "other"
@@ -74,30 +108,43 @@ extract_question_information <- function(question) {
     
     if (response_type == "written") {
       response_detail <- response_details %>%
-        str_remove(regex("Made an order for return and answer tabled \\(", ignore_case = TRUE)) %>%
+        str_remove(response_date) %>%
+        str_remove(fixed(" — ")) %>%
+        str_remove("[A-Za-z (\\.]*") %>%
         str_remove("\\)") %>%
-        trimws()
+        str_remove("[[:space:]]") %>%
+        trimws() %>%
+        paste("Sessional Paper No.", .)
     }
     
     response_date <- response_date %>%
       str_remove("— ") %>%
       trimws()
+    
+    #response_detail = NA_character_ ## TODO remove me, just for debugging when response_detail breaks
+    
+    tibble(
+      question_number = question_number,
+      response_date = response_date,
+      response_sitting_day = response_sitting_day,
+      response_type = response_type,
+      response_detail = response_detail,
+      response_details_full = response_details
+    )
   }
+
+  ## take out the question component, get the response components
+  responses <- entry_components[-1]
   
-  tibble(
-    question_number = question_number,
-    question_sitting_day = question_sitting_day,
-    question_date = mdy(question_date),
-    question_title = question_title,
-    asker = asker,
-    response_date = mdy(response_date),
-    response_sitting_day = response_sitting_day,
-    response_type = response_type,
-    response_detail = response_detail
-  ) %>%
-    separate(asker, into = c("asker_name", "asker_riding"), " \\(") %>%
-    mutate(asker_riding = str_remove(asker_riding, "\\)"))
+  responses_to_return <- responses %>%
+    map_dfr(extract_response_details_from_components)
+  
+  responses_to_return
 }
+
+extract_response_information(questions_raw[[1]])
+extract_response_information(questions_raw[[70]])
+extract_response_information(questions_raw[[1720]])
 
 questions <- questions_raw %>%
   map_dfr(extract_question_information)
