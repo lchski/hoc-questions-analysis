@@ -93,8 +93,7 @@ extract_response_information <- function(question) {
     
     ## TODO verify this doesn't break more stuff hehe
     response_date <- response_details %>%
-      str_split_fixed(" — ", n = 2) %>%
-      .[[2]]
+      str_extract("[A-Z][a-z]* [0-9]{1,2}, [0-9]{4}")
     
     if (is.na(response_details)) {
       response_type = "other"
@@ -111,16 +110,14 @@ extract_response_information <- function(question) {
         response_date_to_remove <- "zzz"
       }
       
-      #response_detail <- response_details %>%
-      #  str_remove(response_date_to_remove) %>%
-      #  str_remove(fixed(" — ")) %>%
-      #  str_remove("[A-Za-z (\\.]*") %>%
-      #  str_remove("\\)") %>%
-      #  str_remove("[[:space:]]") %>%
-      #  trimws() %>%
-      #  paste("Sessional Paper No.", .)
-      
-      response_detail <- NA_character_
+      response_detail <- response_details %>%
+        str_remove(response_date_to_remove) %>%
+        str_remove(fixed(" — ")) %>%
+        str_remove("[A-Za-z (\\.]*") %>%
+        str_remove("\\)") %>%
+        str_remove("[[:space:]]") %>%
+        trimws() %>%
+        paste("Sessional Paper No.", .)
     }
     
     response_date <- response_date %>%
