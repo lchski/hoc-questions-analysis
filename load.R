@@ -4,14 +4,14 @@ library(lubridate)
 
 library(helpers)
 
-questions_raw <- read_xml("data/source/statuswq-E.XML") %>% xml_find_all(xpath = ".//ReviewItem")
+questions_raw <- read_xml("data/source/42-1.XML") %>% xml_find_all(xpath = ".//ReviewItem")
 
 extract_question_information <- function(question) {
   extract_sitting_day <- function(component) {
     component  %>% 
       xml_attr("NodeTitle") %>%
-      str_extract("Status - ([0-9]+)") %>%
-      str_remove("Status - ") %>%
+      str_extract("[^0-9]*([0-9]+)") %>%
+      str_remove("[^0-9]*") %>%
       as.integer
   }
   
@@ -64,7 +64,9 @@ extract_question_information <- function(question) {
       str_remove(response_date) %>%
       trimws()
     
-    if (response_details == "Answered (See Debates)") {
+    if (is.na(response_details)) {
+      response_type = "other"
+    } else if (response_details == "Answered (See Debates)") {
       response_type <- "verbal"
     } else {
       response_type <- "written"
@@ -72,7 +74,7 @@ extract_question_information <- function(question) {
     
     if (response_type == "written") {
       response_detail <- response_details %>%
-        str_remove("Made an order for return and answer tabled \\(") %>%
+        str_remove(regex("Made an order for return and answer tabled \\(", ignore_case = TRUE)) %>%
         str_remove("\\)") %>%
         trimws()
     }
