@@ -52,15 +52,14 @@ scrape_questions_content_for_day <- function(parliament, session, question_sitti
     mutate(question_date = mdy(question_date)) %>%
     mutate(question_number = as.integer(str_remove(question_number, "Q-"))) %>%
     separate(person, into = c("asker_name", "asker_riding"), " \\(") %>%
-    mutate(asker_riding = str_remove(asker_riding, "\\)"))
+    mutate(asker_riding = str_remove(asker_riding, "\\)")) %>%
+    mutate_at(c("asker_name", "asker_riding", "question_content"), trimws)
   
   detailed_questions
 }
 
-slow_scrape_questions_content_for_day <- function(..., waiting_period = 20) {
+slow_scrape_questions_content_for_day <- function(..., waiting_period = 5) {
   Sys.sleep(waiting_period)
   
   scrape_questions_content_for_day(...)
 }
-
-
