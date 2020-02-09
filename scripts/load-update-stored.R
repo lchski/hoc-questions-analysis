@@ -173,8 +173,7 @@ questions_by_parliament <- question_files_by_parliament %>%
            str_remove(fixed("data/source/")) %>%
            str_remove(fixed(".XML"))) %>%
   separate(parliament, c("parliament", "session"), convert = TRUE) %>%
-  mutate(question_uid = paste0(parliament, "-", session, "-", question_number)) %>%
-  select(question_uid, parliament, session, question_number:number_of_responses)
+  select(parliament, session, question_number:number_of_responses)
 
 questions_by_parliament %>% write_csv("data/out/questions_by_parliament.csv")
 
@@ -187,7 +186,6 @@ responses_by_parliament <- question_files_by_parliament %>%
            str_remove(fixed("data/source/")) %>%
            str_remove(fixed(".XML"))) %>%
   separate(parliament, c("parliament", "session"), convert = TRUE) %>%
-  mutate(question_uid = paste0(parliament, "-", session, "-", question_number)) %>%
-  select(question_uid, parliament, session, question_number:response_details_full)
+  select(parliament, session, question_number:response_details_full)
 
 responses_by_parliament %>% write_csv("data/out/responses_by_parliament.csv")

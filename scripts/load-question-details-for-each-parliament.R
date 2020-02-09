@@ -59,8 +59,7 @@ detailed_questions_by_parliament <- questions_by_parliament %>%
       rbind(p42_1_questions) %>%
       rbind(p43_1_questions),
     by = c("parliament", "session", "question_number", "asker_name", "asker_riding")
-  ) %>%
-  mutate(uid = paste0(parliament, "-", session, "-", question_number))
+  )
 
 detailed_questions_by_parliament %>% write_csv("data/out/detailed_questions_by_parliament.csv")
 
