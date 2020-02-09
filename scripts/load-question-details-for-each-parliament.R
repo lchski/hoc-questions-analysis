@@ -62,6 +62,8 @@ detailed_questions_by_parliament <- questions_by_parliament %>%
   ) %>%
   mutate(uid = paste0(parliament, "-", session, "-", question_number))
 
+detailed_questions_by_parliament %>% write_csv("data/out/detailed_questions_by_parliament.csv")
+
 ## get a sense of coverage, how many question contents are empty by session
 ## (there are sometimes a few that slip through, listed on unlikely notice paper pages)
 detailed_questions_by_parliament %>%
