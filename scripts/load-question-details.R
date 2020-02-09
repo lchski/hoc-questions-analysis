@@ -1,25 +1,48 @@
 library(rvest)
 
-scrape_questions_content_for_day <- function(parliament, session, sitting_day) {
-  notice_paper <- read_html(
-    paste0(
-      "https://www.ourcommons.ca/DocumentViewer/en/",
-      parliament,
-      "-",
-      session,
-      "/house/sitting-",
-      sitting_day,
-      "/order-notice/page-11"
-    ))
+scrape_questions_content_for_day <- function(parliament, session, question_sitting_day, ...) {
+  get_question_nodes_from_notice_paper <- function(parliament, session, question_sitting_day, page_number = 11) {
+    notice_paper <- read_html(
+      paste0(
+        "https://www.ourcommons.ca/DocumentViewer/en/",
+        parliament,
+        "-",
+        session,
+        "/house/sitting-",
+        question_sitting_day,
+        "/order-notice/page-",
+        page_number
+      ))
+
+    question_nodes <- notice_paper %>%
+      html_nodes(xpath = '//td[@class="JustifiedTop ItemPara" or @class="JustifiedTop ItemPara LastItemPara"]//b[contains(text(), "Q-")]/..')
+
+    question_nodes
+  }
+
+  question_nodes <- get_question_nodes_from_notice_paper(parliament, session, question_sitting_day)
+
+  if (length(question_nodes) == 0) {
+    question_nodes <- get_question_nodes_from_notice_paper(parliament, session, question_sitting_day, page_number = 12)
+  }
+
+  if (length(question_nodes) == 0) {
+    stop(
+      paste0(
+        "Couldn't find any question nodes. ",
+        "parliament = ", parliament,
+        "; session = ", session,
+        "; question_sitting_day = ", question_sitting_day
+      )
+    )
+  }
   
-  object_ids <- notice_paper %>%
-    html_nodes(xpath = '//td[@class="JustifiedTop ItemPara"]//b[contains(text(), "Q-")]/..') %>%
+  object_ids <- question_nodes %>%
     html_node("b") %>%
     html_nodes(xpath="./text()[normalize-space()]") %>%
     html_text(trim=TRUE)
   
-  detailed_questions <- notice_paper %>%
-    html_nodes(xpath = '//td[@class="JustifiedTop ItemPara"]//b[contains(text(), "Q-")]/..') %>%
+  detailed_questions <- question_nodes %>%
     html_text() %>% 
     str_split(" — ", n = 4) %>%
     transpose() %>%
