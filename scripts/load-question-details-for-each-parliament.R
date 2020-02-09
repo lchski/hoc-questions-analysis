@@ -19,6 +19,12 @@ get_detailed_questions_for_parliamentary_session <- function(parliament_to_check
 ## get a sense of how many requests per session (aka how many sitting days there were with Qs asked)
 questions_by_parliament %>% count_group(parliament, session, question_sitting_day) %>% count()
 
+p39_1_questions <- get_detailed_questions_for_parliamentary_session(39, 1, fast = TRUE)
+p39_1_questions %>% write_csv("data/out/detailed-questions/39-1.csv")
+
+p39_2_questions <- get_detailed_questions_for_parliamentary_session(39, 2, fast = TRUE)
+p39_2_questions %>% write_csv("data/out/detailed-questions/39-2.csv")
+
 p40_1_questions <- get_detailed_questions_for_parliamentary_session(40, 1, fast = TRUE)
 p40_1_questions %>% write_csv("data/out/detailed-questions/40-1.csv")
 
@@ -26,10 +32,19 @@ p43_1_questions <- get_detailed_questions_for_parliamentary_session(43, 1, fast 
 p43_1_questions %>% write_csv("data/out/detailed-questions/43-1.csv")
 
 ## combine all the detailed question objects, left join them to the question index
-questions_by_parliament %>%
+detailed_questions_by_parliament <- questions_by_parliament %>%
   left_join(
-    p40_1_questions %>%
+    p39_1_questions %>%
+      rbind(p39_2_questions) %>%
+      rbind(p40_1_questions) %>%
       rbind(p43_1_questions),
     by = c("parliament", "session", "question_number", "asker_name", "asker_riding")
   )
+
+## get a sense of coverage, how many question contents are empty by session
+## (there are sometimes a few that slip through, listed on unlikely notice paper pages)
+detailed_questions_by_parliament %>%
+  mutate(isna = is.na(question_content)) %>%
+  count_group(parliament, session, isna) %>%
+  arrange(parliament, session, isna)
 
