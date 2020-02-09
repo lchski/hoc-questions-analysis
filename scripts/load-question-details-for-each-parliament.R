@@ -28,6 +28,21 @@ p39_2_questions %>% write_csv("data/out/detailed-questions/39-2.csv")
 p40_1_questions <- get_detailed_questions_for_parliamentary_session(40, 1, fast = TRUE)
 p40_1_questions %>% write_csv("data/out/detailed-questions/40-1.csv")
 
+p40_2_questions <- get_detailed_questions_for_parliamentary_session(40, 2, fast = TRUE)
+p40_2_questions %>% write_csv("data/out/detailed-questions/40-2.csv")
+
+p40_3_questions <- get_detailed_questions_for_parliamentary_session(40, 3, fast = TRUE)
+p40_3_questions %>% write_csv("data/out/detailed-questions/40-3.csv")
+
+p41_1_questions <- get_detailed_questions_for_parliamentary_session(41, 1, fast = TRUE)
+p41_1_questions %>% write_csv("data/out/detailed-questions/41-1.csv")
+
+p41_2_questions <- get_detailed_questions_for_parliamentary_session(41, 2, fast = TRUE)
+p41_2_questions %>% write_csv("data/out/detailed-questions/41-2.csv")
+
+p42_1_questions <- get_detailed_questions_for_parliamentary_session(42, 1, fast = TRUE)
+p42_1_questions %>% write_csv("data/out/detailed-questions/42-1.csv")
+
 p43_1_questions <- get_detailed_questions_for_parliamentary_session(43, 1, fast = TRUE)
 p43_1_questions %>% write_csv("data/out/detailed-questions/43-1.csv")
 
@@ -37,9 +52,15 @@ detailed_questions_by_parliament <- questions_by_parliament %>%
     p39_1_questions %>%
       rbind(p39_2_questions) %>%
       rbind(p40_1_questions) %>%
+      rbind(p40_2_questions) %>%
+      rbind(p40_3_questions) %>%
+      rbind(p41_1_questions) %>%
+      rbind(p41_2_questions) %>%
+      rbind(p42_1_questions) %>%
       rbind(p43_1_questions),
     by = c("parliament", "session", "question_number", "asker_name", "asker_riding")
-  )
+  ) %>%
+  mutate(uid = paste0(parliament, "-", session, "-", question_number))
 
 ## get a sense of coverage, how many question contents are empty by session
 ## (there are sometimes a few that slip through, listed on unlikely notice paper pages)
@@ -47,4 +68,7 @@ detailed_questions_by_parliament %>%
   mutate(isna = is.na(question_content)) %>%
   count_group(parliament, session, isna) %>%
   arrange(parliament, session, isna)
+## get questions without content, aka missing questions (their dates are NA)
+detailed_questions_by_parliament %>%
+  filter(is.na(question_date.y))
 
