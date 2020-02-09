@@ -66,9 +66,6 @@ scrape_questions_content_for_day <- function(parliament, session, question_sitti
     
     return(
       tibble(
-        parliament = NA_real_,
-        session = NA_real_,
-        question_sitting_day = NA_real_,
         question_number = NA_integer_,
         question_date = as_date(NA_real_),
         asker_name = NA_character_,

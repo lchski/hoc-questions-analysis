@@ -17,7 +17,7 @@ get_detailed_questions_for_parliamentary_session <- function(parliament_to_check
     mutate(
       detailed_questions = pmap(., scraper)
     ) %>%
-    unnest(cols = c(detailed_questions))
+    unnest(cols = c(detailed_questions), names_repair = "universal")
 }
 
 p40_1_questions <- get_detailed_questions_for_parliamentary_session(40, 1, fast = TRUE)
