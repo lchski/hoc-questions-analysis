@@ -13,13 +13,13 @@ scrape_questions_content_for_day <- function(parliament, session, sitting_day) {
     ))
   
   object_ids <- notice_paper %>%
-    html_nodes("td.JustifiedTop.ItemPara") %>%
+    html_nodes(xpath = '//td[@class="JustifiedTop ItemPara"]//b/..') %>%
     html_node("b") %>%
     html_nodes(xpath="./text()[normalize-space()]") %>%
     html_text(trim=TRUE)
   
   detailed_questions <- notice_paper %>%
-    html_nodes("td.JustifiedTop.ItemPara") %>%
+    html_nodes(xpath = '//td[@class="JustifiedTop ItemPara"]//b/..') %>%
     html_text() %>% 
     str_split(" — ") %>%
     transpose() %>%
@@ -35,7 +35,7 @@ scrape_questions_content_for_day <- function(parliament, session, sitting_day) {
   detailed_questions
 }
 
-slow_scrape_questions_content_for_day <- function(..., waiting_period = 30) {
+slow_scrape_questions_content_for_day <- function(..., waiting_period = 20) {
   Sys.sleep(waiting_period)
   
   scrape_questions_content_for_day(...)
