@@ -162,30 +162,37 @@ read_responses <- function(path_to_xml_file) {
 
 question_files_by_parliament <- fs::dir_ls("data/source/", regexp = "\\.XML") %>%
   as_tibble() %>%
-  transmute(path = as.character(value))
+  transmute(path = as.character(value)) %>%
+  pull(path) %>%
+  set_names(.)
 
+
+apply_to_parliament_files <- function(parliament_files, func_to_apply) {
+  parliament_files %>%
+    map_dfr(func_to_apply, .id = "source_file") %>%
+    mutate(parliament = source_file %>%
+             str_remove(fixed("data/source/")) %>%
+             str_remove(fixed(".XML"))) %>%
+    separate(parliament, c("parliament", "session"), convert = TRUE)
+}
 
 questions_by_parliament <- question_files_by_parliament %>%
-  pull(path) %>%
-  set_names(.) %>%
-  map_dfr(read_questions, .id = "source_file") %>%
-  mutate(parliament = source_file %>%
-           str_remove(fixed("data/source/")) %>%
-           str_remove(fixed(".XML"))) %>%
-  separate(parliament, c("parliament", "session"), convert = TRUE) %>%
+  apply_to_parliament_files(read_questions) %>%
   select(parliament, session, question_number:number_of_responses)
 
 questions_by_parliament %>% write_csv("data/out/questions_by_parliament.csv")
 
 
+
+## debugging
+## issue with responses .[3]
+question_files_by_parliament %>%
+  .[8] %>%
+  apply_to_parliament_files(read_responses) %>%
+  select(parliament, session, question_number:response_details_full)
+
 responses_by_parliament <- question_files_by_parliament %>%
-  pull(path) %>%
-  set_names(.) %>%
-  map_dfr(read_responses, .id = "source_file") %>%
-  mutate(parliament = source_file %>%
-           str_remove(fixed("data/source/")) %>%
-           str_remove(fixed(".XML"))) %>%
-  separate(parliament, c("parliament", "session"), convert = TRUE) %>%
+  apply_to_parliament_files(read_responses) %>%
   select(parliament, session, question_number:response_details_full)
 
 responses_by_parliament %>% write_csv("data/out/responses_by_parliament.csv")
