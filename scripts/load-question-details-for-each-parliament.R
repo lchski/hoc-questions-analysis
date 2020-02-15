@@ -19,6 +19,25 @@ get_detailed_questions_for_parliamentary_session <- function(parliament_to_check
 ## get a sense of how many requests per session (aka how many sitting days there were with Qs asked)
 questions_by_parliament %>% count_group(parliament, session, question_sitting_day) %>% count()
 
+parliaments_with_questions <- tribble(
+  ~parliament, ~session,
+  39, 1,
+  39, 2,
+  40, 1,
+  40, 2,
+  40, 3,
+  41, 1,
+  41, 2,
+  42, 1,
+  43, 1
+)
+
+test_pwq <- tribble(
+  ~parliament, ~session,
+  40, 1,
+  43, 1
+)
+
 p39_1_questions <- get_detailed_questions_for_parliamentary_session(39, 1, fast = TRUE)
 p39_1_questions %>% write_csv("data/out/detailed-questions/39-1.csv")
 
