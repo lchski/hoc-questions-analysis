@@ -176,20 +176,12 @@ apply_to_parliament_files <- function(parliament_files, func_to_apply) {
     separate(parliament, c("parliament", "session"), convert = TRUE)
 }
 
+
 questions_by_parliament <- question_files_by_parliament %>%
   apply_to_parliament_files(read_questions) %>%
   select(parliament, session, question_number:number_of_responses)
 
 questions_by_parliament %>% write_csv("data/out/questions_by_parliament.csv")
-
-
-
-## debugging
-## issue with responses .[3]
-question_files_by_parliament %>%
-  .[3] %>%
-  apply_to_parliament_files(read_responses) %>%
-  select(parliament, session, question_number:response_details_full)
 
 responses_by_parliament <- question_files_by_parliament %>%
   apply_to_parliament_files(read_responses) %>%
