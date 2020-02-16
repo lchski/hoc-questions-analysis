@@ -70,7 +70,7 @@ extract_response_information <- function(question) {
   if (number_of_responses == 0) {
     responses_to_return <- tibble(
       question_number = question_number,
-      response_date = NA_character_,
+      response_date = mdy(NA_character_),
       response_sitting_day = NA_integer_,
       response_type = NA_character_,
       response_detail = NA_character_,
@@ -187,7 +187,7 @@ questions_by_parliament %>% write_csv("data/out/questions_by_parliament.csv")
 ## debugging
 ## issue with responses .[3]
 question_files_by_parliament %>%
-  .[8] %>%
+  .[3] %>%
   apply_to_parliament_files(read_responses) %>%
   select(parliament, session, question_number:response_details_full)
 
