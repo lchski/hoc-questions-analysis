@@ -19,25 +19,6 @@ get_detailed_questions_for_parliamentary_session <- function(parliament_to_check
 ## get a sense of how many requests per session (aka how many sitting days there were with Qs asked)
 questions_by_parliament %>% count_group(parliament, session, question_sitting_day) %>% count()
 
-parliaments_with_questions <- tribble(
-  ~parliament, ~session,
-  39, 1,
-  39, 2,
-  40, 1,
-  40, 2,
-  40, 3,
-  41, 1,
-  41, 2,
-  42, 1,
-  43, 1
-)
-
-test_pwq <- tribble(
-  ~parliament, ~session,
-  40, 1,
-  43, 1
-)
-
 p39_1_questions <- get_detailed_questions_for_parliamentary_session(39, 1, fast = TRUE)
 p39_1_questions %>% write_csv("data/out/detailed-questions/39-1.csv")
 
@@ -81,6 +62,65 @@ detailed_questions_by_parliament <- questions_by_parliament %>%
   )
 
 detailed_questions_by_parliament %>% write_csv("data/out/detailed_questions_by_parliament.csv")
+
+
+
+parliaments_with_questions <- tribble(
+  ~parliament, ~session, ~is_current,
+  39, 1, FALSE,
+  39, 2, FALSE,
+  40, 1, FALSE,
+  40, 2, FALSE,
+  40, 3, FALSE,
+  41, 1, FALSE,
+  41, 2, FALSE,
+  42, 1, FALSE,
+  43, 1, TRUE
+)
+
+test_pwq <- tribble(
+  ~parliament, ~session, ~is_current,
+  40, 1, FALSE,
+  43, 1, TRUE
+)
+
+
+
+test_pwq %>%
+  mutate(detailed_questions = pmap(., function(parliament, session, is_current) {
+    detailed_questions_file_path <- paste0("data/out/detailed-questions/", parliament, "-", session, ".csv")
+    
+    ## check if there's an existing file, but only for non-current sessions
+    if (! is_current & fs::file_exists(detailed_questions_file_path)) {
+      message(
+        paste0(
+          "Found existing detailed questions, using those.\n\t ",
+          "parliament = ", parliament,
+          "; session = ", session
+        )
+      )
+      
+      return(read_csv(detailed_questions_file_path))
+    }
+    
+    message(
+      paste0(
+        "Current session or no existing detailed questions, scraping.\n\t ",
+        "parliament = ", parliament,
+        "; session = ", session,
+        "; is_current = ", is_current
+      )
+    )
+    
+    detailed_questions <- get_detailed_questions_for_parliamentary_session(parliament, session, fast = TRUE)
+    detailed_questions %>% write_csv(detailed_questions_file_path)
+    
+    return(get_detailed_questions_for_parliamentary_session(parliament, session, fast = TRUE))
+  }))
+
+
+
+
 
 ## get a sense of coverage, how many question contents are empty by session
 ## (there are sometimes a few that slip through, listed on unlikely notice paper pages)
