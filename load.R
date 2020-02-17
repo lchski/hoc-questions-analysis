@@ -80,10 +80,7 @@ questions_and_responses <- questions_by_parliament %>%
   ) %>%
   select(question_uid:question_title, question_content, asker_name:number_of_responses) %>%
   distinct() %>%
-  left_join(
-    responses_by_parliament %>%
-      filter_at(vars(starts_with("response_")), ~ ! is.na(.)) ## filter out nil responses
-  ) %>%
+  left_join(responses_by_parliament) %>%
   nest(
     responses = c(
       response_date,
