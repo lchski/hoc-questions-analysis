@@ -79,7 +79,8 @@ detailed_questions_by_parliament <- parliaments_with_questions %>%
     return(detailed_questions)
   })) %>%
   select(detailed_questions) %>%
-  unnest(c(detailed_questions))
+  unnest(c(detailed_questions)) %>%
+  mutate(question_uid = paste0(parliament, "-", session, "-", question_number))
 
 detailed_questions_by_parliament %>% write_csv("data/out/detailed_questions_by_parliament.csv")
 
