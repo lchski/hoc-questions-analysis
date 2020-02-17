@@ -1,3 +1,5 @@
+source("load.R")
+
 source("lib/load-question-details.R")
 
 get_detailed_questions_for_parliamentary_session <- function(parliament_to_check, session_to_check, fast = FALSE) {
