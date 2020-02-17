@@ -100,7 +100,8 @@ function() {
     count_group(parliament, session, isna) %>%
     arrange(parliament, session, isna)
   
-  ## get questions without content, aka missing questions (their content are NA)
-  detailed_questions_by_parliament %>%
-    filter(is.na(question_content))
+  ## get questions without content, aka missing questions (their second question_date are NA)
+  questions_by_parliament %>%
+    left_join(detailed_questions_by_parliament, by = c("parliament", "session", "question_number", "asker_name")) %>%
+    filter(is.na(question_date.y))
 }
