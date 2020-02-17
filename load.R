@@ -70,3 +70,26 @@ run_if_file_exists(
 
 ## clean up our helper function
 rm(run_if_file_exists)
+
+## get a list of questions with detailed content merged in
+questions_and_responses <- questions_by_parliament %>%
+  left_join(
+    detailed_questions_by_parliament %>%
+      select(question_uid:session, question_number, asker_name, asker_riding, question_content) %>%
+      distinct()
+  ) %>%
+  select(question_uid:question_title, question_content, asker_name:number_of_responses) %>%
+  distinct() %>%
+  left_join(
+    responses_by_parliament %>%
+      filter_at(vars(starts_with("response_")), ~ ! is.na(.)) ## filter out nil responses
+  ) %>%
+  nest(
+    responses = c(
+      response_date,
+      response_sitting_day,
+      response_type,
+      response_detail,
+      response_details_full
+    )
+  )

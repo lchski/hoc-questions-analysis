@@ -18,3 +18,14 @@ extract_question_information(questions_raw[[3]])
   # - some e.g. parl 42-1 Q-70 have two responses
   # - parl 42-1 says "Made an Order for Return and answer tabled"
 
+
+## find duplicated questions in `questions_and_responses` (tied, I think, to slightly different content)
+questions_and_responses %>%
+  filter(question_uid %in%
+           ((.) %>%
+              count_group(question_uid) %>%
+              filter(count > 1) %>%
+              pull(question_uid)
+            )
+         )
+
