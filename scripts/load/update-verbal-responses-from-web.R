@@ -67,4 +67,32 @@ get_response_nodes_from_hansard <- function(parliament, session, sitting_day) {
   response_nodes
 }
 
-get_response_nodes_from_hansard(40, 3, 120)
+extract_response_information_from_hansard <- function(response_node) {
+  question_number <- response_node %>%
+    xml_find_first(".//QuestionID") %>%
+    xml_text() %>%
+    str_remove("Question No.") %>%
+    str_remove("--") %>%
+    as.integer
+  
+  asker_name <- response_node %>%
+    xml_find_first(".//Questioner/Affiliation") %>%
+    xml_text() %>%
+    trimws
+  
+  response_content <- response_node %>%
+    xml_find_first(".//QuestionContent") %>%
+    xml_text() %>%
+    trimws
+  
+  tibble(
+    question_number = question_number,
+    asker_name = asker_name,
+    response_content = response_content
+  )
+}
+
+get_response_nodes_from_hansard(40, 3, 120) %>%
+  map_dfr(extract_response_information_from_hansard)
+
+
