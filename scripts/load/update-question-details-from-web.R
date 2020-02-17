@@ -94,12 +94,13 @@ function() {
   
   ## get a sense of coverage, how many question contents are empty by session
   ## (there are sometimes a few that slip through, listed on unlikely notice paper pages)
+  ## `isna == TRUE` captures the missing #/%
   detailed_questions_by_parliament %>%
     mutate(isna = is.na(question_content)) %>%
     count_group(parliament, session, isna) %>%
     arrange(parliament, session, isna)
   
-  ## get questions without content, aka missing questions (their dates are NA)
+  ## get questions without content, aka missing questions (their content are NA)
   detailed_questions_by_parliament %>%
-    filter(is.na(question_date.y))
+    filter(is.na(question_content))
 }
