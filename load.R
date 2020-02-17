@@ -7,9 +7,10 @@ library(helpers)
 ## NB: This file just loads existing data from disk.
 ##
 ## To create the files loaded here, run:
-##   source("scripts/load-update-questions-responses-from-xml.R")
-##   source("scripts/load-question-details-from-web.R")
+##   source("scripts/load/update-questions-responses-from-xml.R")
+##   source("scripts/load/update-question-details-from-web.R")
 
+## helper function to check if a file exists and bail gracefully if not
 run_if_file_exists <- function(file, func) {
   if (fs::file_exists(file)) {
     func
@@ -18,6 +19,7 @@ run_if_file_exists <- function(file, func) {
   }
 }
 
+## load the questions from Status of House Business XML files
 run_if_file_exists(
   "data/out/questions_by_parliament.csv",
   questions_by_parliament <- read_csv("data/out/questions_by_parliament.csv", col_types = cols(
@@ -34,6 +36,7 @@ run_if_file_exists(
   ))
 )
 
+## load the responses from Status of House Business XML files
 run_if_file_exists(
   "data/out/responses_by_parliament.csv",
   responses_by_parliament <- read_csv("data/out/responses_by_parliament.csv", col_types = cols(
@@ -49,9 +52,11 @@ run_if_file_exists(
   ))
 )
 
+## load the detailed questions from notice papers
 run_if_file_exists(
   "data/out/detailed_questions_by_parliament.csv",
   detailed_questions_by_parliament <- read_csv("data/out/detailed_questions_by_parliament.csv", col_types = cols(
+    question_uid = col_character(),
     parliament = col_double(),
     session = col_double(),
     question_sitting_day = col_double(),
@@ -62,3 +67,6 @@ run_if_file_exists(
     question_content = col_character()
   ))
 )
+
+## clean up our helper function
+rm(run_if_file_exists)
