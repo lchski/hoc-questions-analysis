@@ -61,7 +61,7 @@ detailed_questions_by_parliament <- questions_by_parliament %>%
     by = c("parliament", "session", "question_number", "asker_name", "asker_riding")
   )
 
-detailed_questions_by_parliament %>% write_csv("data/out/detailed_questions_by_parliament.csv")
+
 
 
 
@@ -78,15 +78,7 @@ parliaments_with_questions <- tribble(
   43, 1, TRUE
 )
 
-test_pwq <- tribble(
-  ~parliament, ~session, ~is_current,
-  40, 1, FALSE,
-  43, 1, TRUE
-)
-
-
-
-test_pwq %>%
+detailed_questions_by_parliament <- parliaments_with_questions %>%
   mutate(detailed_questions = pmap(., function(parliament, session, is_current) {
     detailed_questions_file_path <- paste0("data/out/detailed-questions/", parliament, "-", session, ".csv")
     
@@ -96,11 +88,27 @@ test_pwq %>%
         paste0(
           "Found existing detailed questions, using those.\n\t ",
           "parliament = ", parliament,
-          "; session = ", session
+          "; session = ", session,
+          "; is_current = ", is_current
         )
       )
       
-      return(read_csv(detailed_questions_file_path))
+      return(
+        read_csv(
+          detailed_questions_file_path,
+          col_types = cols(
+            parliament = col_double(),
+            session = col_double(),
+            question_sitting_day = col_double(),
+            question_number = col_double(),
+            question_date = col_date(format = ""),
+            asker_name = col_character(),
+            asker_riding = col_character(),
+            question_content = col_character()
+          ),
+          
+        )
+      )
     }
     
     message(
@@ -115,8 +123,13 @@ test_pwq %>%
     detailed_questions <- get_detailed_questions_for_parliamentary_session(parliament, session, fast = TRUE)
     detailed_questions %>% write_csv(detailed_questions_file_path)
     
-    return(get_detailed_questions_for_parliamentary_session(parliament, session, fast = TRUE))
-  }))
+    return(detailed_questions)
+  })) %>%
+  select(detailed_questions) %>%
+  unnest(c(detailed_questions))
+
+detailed_questions_by_parliament %>% write_csv("data/out/detailed_questions_by_parliament.csv")
+
 
 
 
