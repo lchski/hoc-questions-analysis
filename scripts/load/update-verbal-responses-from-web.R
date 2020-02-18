@@ -1,5 +1,7 @@
 library(rvest)
 
+source("load.R")
+
 generate_hansard_url <- function(parliament, session, sitting_day, format = "xml") {
   sitting_day_padded <- str_pad(sitting_day, 3, c("left"), "0")
 
@@ -26,11 +28,6 @@ generate_hansard_url <- function(parliament, session, sitting_day, format = "xml
     ))
   }
 }
-
-generate_hansard_url(40, 3, 120)
-generate_hansard_url(43, 1, 17, "html")
-
-hansard <- read_xml("data/source/hansard/403/HAN120-E.XML")
 
 get_response_nodes_from_hansard <- function(parliament, session, sitting_day, store_hansard_xml = FALSE) {
   hansard <- NULL
@@ -125,30 +122,19 @@ extract_response_information_from_hansard <- function(response_node) {
   )
 }
 
-get_response_nodes_from_hansard(40, 3, 120, store_hansard_xml = TRUE) %>%
-  map_dfr(extract_response_information_from_hansard)
-
-get_response_nodes_from_hansard(39, 1, 27, store_hansard_xml = TRUE) %>%
-  map_dfr(extract_response_information_from_hansard)
-
 get_verbal_responses_for_sitting_day <- function(parliament, session, response_sitting_day, ...) {
   get_response_nodes_from_hansard(parliament, session, response_sitting_day, ...) %>%
     map_dfr(extract_response_information_from_hansard)
 }
 
-## get the days for which we have verbal responses
-responses_by_parliament %>%
-  filter(response_type == "verbal") %>%
-  select(parliament, session, response_sitting_day) %>%
-  distinct()
-
+## get the days for which we have verbal responses, then get the verbal responses for those days
 verbal_responses <- responses_by_parliament %>%
   filter(response_type == "verbal") %>%
   select(parliament, session, response_sitting_day) %>%
   arrange(parliament, session, response_sitting_day) %>%
   distinct() %>%
   mutate(
-    verbal_responses = pmap(., get_verbal_responses_for_sitting_day)
+    verbal_responses = pmap(., get_verbal_responses_for_sitting_day) ## NB add `, store_hansard_xml = TRUE` if you want to save all the XML files you download
   ) %>%
   unnest(c(verbal_responses)) %>%
   filter(! is.na(responder_name)) ## remove the odd "Return tabled" that slipped through (no responder listed)
