@@ -1,15 +1,17 @@
 library(rvest)
 
 generate_hansard_url <- function(parliament, session, sitting_day, format = "xml") {
+  sitting_day_padded <- str_pad(sitting_day, 3, c("left"), "0")
+
   if (format == "xml") {
     return(paste0(
       "https://www.ourcommons.ca/Content/House/",
       parliament,
       session,
       "/Debates/",
-      sitting_day,
+      sitting_day_padded,
       "/HAN",
-      sitting_day,
+      sitting_day_padded,
       "-E.XML"
     ))
   } else if (format == "html") {
@@ -26,13 +28,16 @@ generate_hansard_url <- function(parliament, session, sitting_day, format = "xml
 }
 
 generate_hansard_url(40, 3, 120)
+generate_hansard_url(43, 1, 17, "html")
 
 hansard <- read_xml("data/source/hansard/403/HAN120-E.XML")
 
-get_response_nodes_from_hansard <- function(parliament, session, sitting_day) {
+get_response_nodes_from_hansard <- function(parliament, session, sitting_day, store_hansard_xml = FALSE) {
   hansard <- NULL
   
-  hansard_file_path <- paste0("data/source/hansard/", parliament, session, "/HAN", sitting_day, "-E.XML")
+  sitting_day_padded <- str_pad(sitting_day, 3, c("left"), "0")
+
+  hansard_file_path <- paste0("data/source/hansard/", parliament, "-", session, "-HAN", sitting_day_padded, "-E.XML")
   
   if (fs::file_exists(hansard_file_path)) {
     hansard <- read_xml(hansard_file_path)
@@ -57,6 +62,10 @@ get_response_nodes_from_hansard <- function(parliament, session, sitting_day) {
     return(list())
   }
   
+  if (store_hansard_xml) {
+    hansard %>% write_xml(hansard_file_path)
+  }
+
   response_section <- hansard %>%
     xml_nodes(xpath = '//SubjectOfBusiness/SubjectOfBusinessTitle[contains(text(), "Questions on the Order Paper") or contains(text(), "Questions on the Order Paper")]/..')
   
@@ -92,7 +101,14 @@ extract_response_information_from_hansard <- function(response_node) {
   )
 }
 
-get_response_nodes_from_hansard(40, 3, 120) %>%
+get_response_nodes_from_hansard(40, 3, 120, store_hansard_xml = TRUE) %>%
   map_dfr(extract_response_information_from_hansard)
 
+get_response_nodes_from_hansard(39, 1, 27, store_hansard_xml = TRUE) %>%
+  map_dfr(extract_response_information_from_hansard)
 
+## get the days for which we have verbal responses
+responses_by_parliament %>%
+  filter(response_type == "verbal") %>%
+  select(parliament, session, response_sitting_day) %>%
+  distinct()
