@@ -9,6 +9,7 @@ library(helpers)
 ## To create the files loaded here, run:
 ##   source("scripts/load/update-questions-responses-from-xml.R")
 ##   source("scripts/load/update-question-details-from-web.R")
+##   source("scripts/load/update-verbal-responses-from-web.R")
 
 ## helper function to check if a file exists and bail gracefully if not
 run_if_file_exists <- function(file, func) {
