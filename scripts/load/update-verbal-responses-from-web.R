@@ -90,7 +90,7 @@ extract_response_information_from_hansard <- function(response_node) {
     trimws
   
   response_content <- response_node %>%
-    xml_find_first(".//QuestionContent") %>%
+    xml_find_first(".//ResponseContent") %>%
     xml_text() %>%
     trimws
   
