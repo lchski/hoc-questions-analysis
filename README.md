@@ -45,7 +45,7 @@ Taking advantage of [the XML data offered by the House of Commons](https://www.o
 
 ## Using this project
 
-If you’d just like to use the data, I’ve saved [the processed data files to their own repo](https://github.com/lchski/hoc-questions-data). The README there explains which file is which—you probably want `questions_and_responses.csv`, as it’s the most processed.
+If you’d just like to use the data, I’ve saved [the processed data files to their own repo](https://github.com/lchski/hoc-questions-data). The README there explains which file is which—you probably want `questions_and_responses.csv`, as it’s the most processed. You can also [browse the data in a datasette instance](https://hoc-written-questions.glitch.me/data/questions_and_responses) (a straightforward database/SQL interface, in your browser).
 
 You can download and run the R code from this repo if you’d like. To prime the data, you’ll need to run the following:
 
@@ -65,7 +65,7 @@ _NB!_ There’s a... very decent chance this is not yet a 100% reproducible repo
 
 ### Website to view question and answer data
 
-This project and the processed data are both in pretty good shape. A great next step would be to set up a simple interface to the data, to easily peruse the questions and responses. I’ve a [datasette instance](https://github.com/simonw/datasette) in mind, but invite you to run with this however you like. If you do something with it, please [let me know](https://twitter.com/lchski)!
+This project and the processed data are both in pretty good shape. A great next step would be to set up a simple interface to the data, to easily peruse the questions and responses. I’ve put together [a datasette instance](https://hoc-written-questions.glitch.me/data/questions_and_responses) ([check out `simonw/datasette` if you don’t know it already](https://github.com/simonw/datasette)), but invite you to run with this however you like. If you do something with it, please [let me know](https://twitter.com/lchski)!
 
 
 ### Sessional papers
