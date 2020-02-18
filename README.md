@@ -55,7 +55,7 @@ source("scripts/load/update-question-details-from-web.R")
 source("scripts/load/update-verbal-responses-from-web.R")
 ```
 
-After that, `source("load.R)` should be all you need.
+After that, `source("load.R")` should be all you need.
 
 _NB!_ There’s a... very decent chance this is not yet a 100% reproducible repo. I likely have some pre-loaded data or pre-created folders or so on that makes it work on my machine. If you run into any problems, don’t hesitate to [create an issue](https://github.com/lchski/parliamentary-questions-analysis/issues) or [reach out on Twitter](https://twitter.com/lchski).
 
