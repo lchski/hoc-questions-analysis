@@ -86,7 +86,7 @@ run_if_file_exists(
 ## clean up our helper function
 rm(run_if_file_exists)
 
-## get a list of questions with detailed content merged in
+## get a list of questions with detailed content and responses merged in
 questions_and_responses <- questions_by_parliament %>%
   left_join(
     detailed_questions_by_parliament %>%
