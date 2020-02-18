@@ -41,13 +41,31 @@ get_response_nodes_from_hansard <- function(parliament, session, sitting_day, st
   
   if (fs::file_exists(hansard_file_path)) {
     hansard <- read_xml(hansard_file_path)
+
+    message(
+      paste0(
+        "Hansard file already exists, using that.\n\t ",
+        "parliament = ", parliament,
+        "; session = ", session,
+        "; sitting_day = ", sitting_day
+      )
+    )
   } else {
+    message(
+      paste0(
+        "Hansard file doesn't exist, scraping.\n\t ",
+        "parliament = ", parliament,
+        "; session = ", session,
+        "; sitting_day = ", sitting_day
+      )
+    )
+
     tryCatch({
       hansard <- read_xml(generate_hansard_url(parliament, session, sitting_day))},
       error = function(c) {
         message(
           paste0(
-            "Got an error when trying to read_html a hansard.\n\t ",
+            "Got an error when trying to read_xml a hansard.\n\t ",
             "parliament = ", parliament,
             "; session = ", session,
             "; sitting_day = ", sitting_day
@@ -94,9 +112,15 @@ extract_response_information_from_hansard <- function(response_node) {
     xml_text() %>%
     trimws
   
+  responder_name <- response_node %>%
+    xml_find_first(".//Responder/Affiliation") %>%
+    xml_text() %>%
+    trimws
+
   tibble(
     question_number = question_number,
     asker_name = asker_name,
+    responder_name = responder_name,
     response_content = response_content
   )
 }
@@ -118,11 +142,11 @@ responses_by_parliament %>%
   select(parliament, session, response_sitting_day) %>%
   distinct()
 
-responses_by_parliament %>%
+verbal_responses <- responses_by_parliament %>%
   filter(response_type == "verbal") %>%
   select(parliament, session, response_sitting_day) %>%
+  arrange(parliament, session, response_sitting_day) %>%
   distinct() %>%
-  slice(1:10) %>%
   mutate(
-    detailed_questions = pmap(., get_verbal_responses_for_sitting_day, store_hansard_xml = TRUE)
+    verbal_responses = pmap(., get_verbal_responses_for_sitting_day)
   )
