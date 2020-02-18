@@ -107,8 +107,22 @@ get_response_nodes_from_hansard(40, 3, 120, store_hansard_xml = TRUE) %>%
 get_response_nodes_from_hansard(39, 1, 27, store_hansard_xml = TRUE) %>%
   map_dfr(extract_response_information_from_hansard)
 
+get_verbal_responses_for_sitting_day <- function(parliament, session, response_sitting_day, ...) {
+  get_response_nodes_from_hansard(parliament, session, response_sitting_day, ...) %>%
+    map_dfr(extract_response_information_from_hansard)
+}
+
 ## get the days for which we have verbal responses
 responses_by_parliament %>%
   filter(response_type == "verbal") %>%
   select(parliament, session, response_sitting_day) %>%
   distinct()
+
+responses_by_parliament %>%
+  filter(response_type == "verbal") %>%
+  select(parliament, session, response_sitting_day) %>%
+  distinct() %>%
+  slice(1:10) %>%
+  mutate(
+    detailed_questions = pmap(., get_verbal_responses_for_sitting_day, store_hansard_xml = TRUE)
+  )
