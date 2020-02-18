@@ -2,6 +2,12 @@
 
 
 
+## Summary
+
+This project consolidates information about written questions from the Canadian House of Commons. It covers Parliaments 39 to 43 (the current Parliament), April 3, 2006 to the present day. You can [run the code or access the data](#using-this-project), or read through all the sections to understand more about the [background of written questions](#background), the [data we bring together](#assembling-the-data), or [how you can pitch in](#next-steps).
+
+
+
 ## Background
 
 Written questions are a valuable form of information about the workings of government. Compared to the very constrained back-and-forth of the oral question period, written questions allow MPs to form a detailed question to which the government can provide a detailed response. You can [read about the procedural rules around written questions](https://www.ourcommons.ca/About/OurProcedure/Questions/c_g_questions-e.htm#3) if you want to learn more.
@@ -33,7 +39,7 @@ This project pulls that information in. In addition to the variables listed abov
 - Full question content (pulling from the _Notice Paper_ for the day a question was put forward, e.g., [the _Notice Paper_ for December 7, 2015, with the first four questions from the 42<sup>nd</sup> Parliament, 1<sup>st</sup> session](https://www.ourcommons.ca/DocumentViewer/en/42-1/house/sitting-4/order-notice/page-11), listed under the “Questions” section)
 - For verbal responses, the responder name and response content (pulling from the _Debates_, e.g., [the response to Q-17 in the _Debates_ for January 25, 2016](https://www.ourcommons.ca/DocumentViewer/en/42-1/house/sitting-8/hansard#sob8766785), listed under the “Questions on the Order Paper” section)
 
-Taking advantage of [the XML data offered by the House of Commons](https://www.ourcommons.ca/en/open-data), we can automate this parsing. It’s not perfect—[e.g., there are a few question/response details missing](https://github.com/lchski/parliamentary-questions-analysis/blob/master/scripts/load/update-question-details-from-web.R#L90-L107)—but this goes a long way to building a consolidated list of questions and responses.
+Taking advantage of [the XML data offered by the House of Commons](https://www.ourcommons.ca/en/open-data), we can automate this parsing. It’s not perfect—[e.g., there are a few question/response details missing](https://github.com/lchski/parliamentary-questions-analysis/blob/master/scripts/load/update-question-details-from-web.R#L90-L107)—but this goes a long way to building a consolidated list of questions and responses. We can cover back to the 39<sup>th</sup> Parliament, the earliest with full XML coverage.
 
 
 
