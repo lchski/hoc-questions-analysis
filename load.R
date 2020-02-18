@@ -36,22 +36,6 @@ run_if_file_exists(
   ))
 )
 
-## load the responses from Status of House Business XML files
-run_if_file_exists(
-  "data/out/responses_by_parliament.csv",
-  responses_by_parliament <- read_csv("data/out/responses_by_parliament.csv", col_types = cols(
-    question_uid = col_character(),
-    parliament = col_double(),
-    session = col_double(),
-    question_number = col_double(),
-    response_date = col_date(format = ""),
-    response_sitting_day = col_double(),
-    response_type = col_character(),
-    response_detail = col_character(),
-    response_details_full = col_character()
-  ))
-)
-
 ## load the detailed questions from notice papers
 run_if_file_exists(
   "data/out/detailed_questions_by_parliament.csv",
@@ -68,6 +52,37 @@ run_if_file_exists(
   ))
 )
 
+## load the responses from Status of House Business XML files
+run_if_file_exists(
+  "data/out/responses_by_parliament.csv",
+  responses_by_parliament <- read_csv("data/out/responses_by_parliament.csv", col_types = cols(
+    question_uid = col_character(),
+    parliament = col_double(),
+    session = col_double(),
+    question_number = col_double(),
+    response_date = col_date(format = ""),
+    response_sitting_day = col_double(),
+    response_type = col_character(),
+    response_detail = col_character(),
+    response_details_full = col_character()
+  ))
+)
+
+## load the questions from Status of House Business XML files
+run_if_file_exists(
+  "data/out/verbal_responses.csv",
+  verbal_responses <- read_csv("data/out/verbal_responses.csv", col_types = cols(
+    question_uid = col_character(),
+    parliament = col_double(),
+    session = col_double(),
+    response_sitting_day = col_double(),
+    question_number = col_double(),
+    asker_name = col_character(),
+    responder_name = col_character(),
+    response_content = col_character()
+  ))
+)
+
 ## clean up our helper function
 rm(run_if_file_exists)
 
@@ -80,13 +95,19 @@ questions_and_responses <- questions_by_parliament %>%
   ) %>%
   select(question_uid:question_title, question_content, asker_name:number_of_responses) %>%
   distinct() %>%
-  left_join(responses_by_parliament) %>%
+  left_join(
+    responses_by_parliament %>%
+      left_join(verbal_responses) %>%
+      select(-asker_name)
+  ) %>%
   nest(
     responses = c(
       response_date,
       response_sitting_day,
       response_type,
       response_detail,
-      response_details_full
+      response_details_full,
+      responder_name,
+      response_content
     )
   )
