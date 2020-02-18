@@ -111,3 +111,7 @@ questions_and_responses <- questions_by_parliament %>%
       response_content
     )
   )
+
+questions_and_responses %>%
+  unnest(c(responses)) %>%
+  write_csv("data/out/questions_and_responses.csv")
