@@ -149,4 +149,9 @@ verbal_responses <- responses_by_parliament %>%
   distinct() %>%
   mutate(
     verbal_responses = pmap(., get_verbal_responses_for_sitting_day)
-  )
+  ) %>%
+  unnest(c(verbal_responses)) %>%
+  filter(! is.na(responder_name)) ## remove the odd "Return tabled" that slipped through (no responder listed)
+
+verbal_responses %>%
+  write_csv("data/out/verbal_responses.csv")
