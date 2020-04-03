@@ -33,7 +33,7 @@ parliaments_with_questions <- tribble(
 
 detailed_questions_by_parliament <- parliaments_with_questions %>%
   mutate(detailed_questions = pmap(., function(parliament, session, is_current) {
-    detailed_questions_file_path <- paste0("data/out/detailed-questions/", parliament, "-", session, ".csv")
+    detailed_questions_file_path <- paste0("data/source/detailed-questions/", parliament, "-", session, ".csv")
     
     ## check if there's an existing file, but only for non-current sessions
     if (! is_current & fs::file_exists(detailed_questions_file_path)) {
