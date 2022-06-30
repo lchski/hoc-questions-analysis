@@ -94,7 +94,7 @@ extract_response_information_from_hansard <- function(response_node) {
     xml_find_first(".//QuestionID") %>%
     xml_text() %>%
     str_remove("Question No.") %>%
-    str_remove("--") %>%
+    str_remove_all("[^0-9]") %>%
     as.integer
   
   asker_name <- response_node %>%
